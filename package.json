@@ -1,0 +1,28 @@
+{
+  "name": "dayos",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:e2e": "pnpm --filter @dayos/web test:e2e",
+    "db:generate": "pnpm --filter @dayos/database db:generate",
+    "db:migrate": "pnpm --filter @dayos/database db:migrate",
+    "db:seed": "pnpm --filter @dayos/api db:seed",
+    "db:verify": "pnpm --filter @dayos/database db:verify"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "16.3.1",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
