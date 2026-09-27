@@ -1,10 +1,20 @@
-import type { Task, TimeBlock, UserProfile } from "@dayos/domain";
+import type { RoutineWindowPreference, Task, TimeBlock, UserPreferences, UserProfile } from "@dayos/domain";
 import { generateDayPlan } from "@dayos/planner";
 import { localTimeOnDate } from "@dayos/utils";
 import type { UserData } from "./types.js";
 
 const users = new Map<string, UserData>();
 const dateInZone = (zone: string) => new Intl.DateTimeFormat("en-CA", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+export const defaultRoutineWindows = (): RoutineWindowPreference[] => [
+  { id: "work", title: "Work / study commitments", kind: "WORK", days: [1,2,3,4,5], start: "09:00", end: "18:00", durationMinutes: 540, flexibility: "FIXED", active: true },
+  { id: "movement", title: "Workout / movement", kind: "EXERCISE", days: [1,2,4,6], start: "18:00", end: "19:00", durationMinutes: 45, flexibility: "PREFERRED", active: true },
+  { id: "learning", title: "Learning / skill practice", kind: "LEARNING", days: [1,2,3,4,5,6], start: "19:30", end: "20:30", durationMinutes: 45, flexibility: "PREFERRED", active: true },
+  { id: "hobby", title: "Hobby / personal project", kind: "HOBBY", days: [0,3,6], start: "16:00", end: "17:30", durationMinutes: 60, flexibility: "PREFERRED", active: true },
+  { id: "family", title: "Family / relationships", kind: "FAMILY", days: [0,1,2,3,4,5,6], start: "20:30", end: "21:30", durationMinutes: 45, flexibility: "PREFERRED", active: true },
+  { id: "quiet", title: "Meditation / quiet start", kind: "MEDITATION", days: [0,1,2,3,4,5,6], start: "07:00", end: "07:30", durationMinutes: 15, flexibility: "PREFERRED", active: true },
+  { id: "wind-down", title: "Evening wind-down", kind: "WIND_DOWN", days: [0,1,2,3,4,5,6], start: "22:15", end: "22:45", durationMinutes: 30, flexibility: "FIXED", active: true }
+];
+export const defaultPreferences = (): UserPreferences => ({ priorities: [], improvementGoals: [], exercisePreference: "NO_PREFERENCE", variableWorkHours: false, mealWindows: { breakfast: { start: "08:00", end: "09:00" }, lunch: { start: "13:00", end: "14:30" }, dinner: { start: "19:00", end: "20:30" } }, routineWindows: defaultRoutineWindows(), freeTime: { preferredUses: ["Family", "Meditation", "Learning", "Rest"], minimumOpenWindowMinutes: 60, dailyUnscheduledMinutes: 60 }, planningStyle: "BALANCED" });
 
 function seedTask(id: string, title: string, minutes: number, priority: Task["priority"], lifeArea: Task["lifeArea"], energy: Task["energyRequired"], deadline?: string): Task {
   return { id, title, lifeArea, status: "BACKLOG", priority, estimatedMinutes: minutes, actualMinutes: 0, energyRequired: energy, schedulingType: "FLEXIBLE", canSplit: true, minimumSessionMinutes: 25, ...(deadline ? { deadline } : {}) };
@@ -12,7 +22,7 @@ function seedTask(id: string, title: string, minutes: number, priority: Task["pr
 
 export function makeUser(authUserId: string): UserData {
   const timezone = "Asia/Kolkata"; const date = dateInZone(timezone);
-  const profile: UserProfile = { id: crypto.randomUUID(), authUserId, displayName: "Alex", timezone, wakeTime: "07:00", sleepTime: "23:00", workStartTime: "09:00", workEndTime: "18:00", defaultFocusDurationMinutes: 90, defaultBreakDurationMinutes: 15, dailyWaterTargetMl: 3000, onboardingCompleted: true };
+  const profile: UserProfile = { id: crypto.randomUUID(), authUserId, displayName: "Alex", timezone, wakeTime: "07:00", sleepTime: "23:00", workStartTime: "09:00", workEndTime: "18:00", defaultFocusDurationMinutes: 90, defaultBreakDurationMinutes: 15, dailyWaterTargetMl: 3000, onboardingCompleted: true, preferences: { ...defaultPreferences(), priorities: ["Work", "Learning", "Exercise", "Recovery"], improvementGoals: ["Focus", "Balance"] } };
   const tasks = [
     seedTask(crypto.randomUUID(), "Build authentication flow", 120, "CRITICAL", "WORK", "DEEP_FOCUS", new Date(Date.now() + 86_400_000).toISOString()),
     seedTask(crypto.randomUUID(), "Refine planner constraints", 90, "HIGH", "WORK", "DEEP_FOCUS"),
@@ -24,7 +34,7 @@ export function makeUser(authUserId: string): UserData {
     seedTask(crypto.randomUUID(), "Capture project notes", 25, "LOW", "WORK", "LOW")
   ];
   const time = (value: string) => localTimeOnDate(date, value, timezone).toISOString();
-  const result = generateDayPlan({ date, timezone, wakeTime: profile.wakeTime, sleepTime: profile.sleepTime, tasks: tasks.slice(0, 5), fixedEvents: [{ id: crypto.randomUUID(), title: "Team stand-up", startAt: time("12:15"), endAt: time("12:45"), lifeArea: "WORK" }], protectedWindows: [
+  const result = generateDayPlan({ date, timezone, wakeTime: profile.wakeTime, sleepTime: profile.sleepTime, tasks: tasks.slice(0, 5), includeSleep: false, fixedEvents: [{ id: crypto.randomUUID(), title: "Team stand-up", startAt: time("12:15"), endAt: time("12:45"), lifeArea: "WORK" }], protectedWindows: [
     { id: crypto.randomUUID(), title: "Breakfast", type: "MEAL", windowStart: "07:45", windowEnd: "08:45", durationMinutes: 30, lifeArea: "RECOVERY" },
     { id: crypto.randomUUID(), title: "Lunch", type: "MEAL", windowStart: "13:00", windowEnd: "14:30", durationMinutes: 45, lifeArea: "RECOVERY" },
     { id: crypto.randomUUID(), title: "Strength training", type: "EXERCISE", windowStart: "17:30", windowEnd: "19:30", durationMinutes: 60, lifeArea: "HEALTH", priority: "HIGH" },
@@ -37,6 +47,11 @@ export function makeUser(authUserId: string): UserData {
     { id: crypto.randomUUID(), name: "Gym", lifeArea: "HEALTH", estimatedDurationMinutes: 60, frequencyType: "TIMES_PER_WEEK", targetPerWeek: 5, streak: 3, completedToday: false, active: true },
     { id: crypto.randomUUID(), name: "Wind down", lifeArea: "RECOVERY", estimatedDurationMinutes: 20, frequencyType: "DAILY", targetPerWeek: 7, streak: 8, completedToday: false, active: true }
   ], plans: [{ id: crypto.randomUUID(), date, status: "ACTIVE", blocks }], hydration: [{ id: crypto.randomUUID(), amountMl: 500, loggedAt: new Date().toISOString() }, { id: crypto.randomUUID(), amountMl: 750, loggedAt: new Date().toISOString() }], focus: [], reflections: [] };
+}
+
+export function makeEmptyUser(authUserId: string, id: string = crypto.randomUUID()): UserData {
+  const timezone = "Asia/Kolkata";
+  return { profile: { id, authUserId, displayName: "DayOS user", timezone, wakeTime: "07:00", sleepTime: "23:00", workStartTime: "09:00", workEndTime: "18:00", defaultFocusDurationMinutes: 90, defaultBreakDurationMinutes: 15, dailyWaterTargetMl: 3000, onboardingCompleted: false, preferences: defaultPreferences() }, tasks: [], habits: [], plans: [], hydration: [], focus: [], reflections: [] };
 }
 
 export function getUserData(authUserId: string): UserData {

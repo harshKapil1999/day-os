@@ -10,7 +10,9 @@ if (process.env.NODE_ENV !== "test" && process.env.DAYOS_TEST_MODE !== "1") {
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   API_PORT: z.coerce.number().int().positive().default(4000),
+  PORT: z.coerce.number().int().positive().optional(),
   WEB_URL: z.string().url().default("http://localhost:3000"),
+  CORS_ORIGINS: z.string().optional(),
   DATABASE_URL: z.string().url().optional(),
   CLERK_SECRET_KEY: z.string().min(10).optional(),
   AUTH_MODE: z.enum(["clerk", "demo"]).default("demo"),

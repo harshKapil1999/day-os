@@ -14,6 +14,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.31.6",
     "@dayos/api-client": "workspace:*",
+    "@dayos/contracts": "workspace:*",
     "@dayos/domain": "workspace:*",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",

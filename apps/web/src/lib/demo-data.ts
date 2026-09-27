@@ -1,6 +1,7 @@
-import type { Task, TimeBlock } from "@dayos/domain";
+import type { Task, TimeBlock, UserProfile } from "@dayos/domain";
 
 const now = new Date(); const at = (hour: number, minute = 0) => { const value = new Date(now); value.setHours(hour, minute, 0, 0); return value.toISOString(); };
+export const demoProfile: UserProfile = { id: "demo-profile", authUserId: "demo_user_alex", displayName: "Alex Kapoor", timezone: "Asia/Kolkata", wakeTime: "07:00", sleepTime: "23:00", workStartTime: "09:00", workEndTime: "18:00", defaultFocusDurationMinutes: 90, defaultBreakDurationMinutes: 15, dailyWaterTargetMl: 3000, onboardingCompleted: true, preferences: { priorities: ["Work", "Learning", "Exercise", "Recovery"], improvementGoals: ["Focus", "Balance"], exercisePreference: "EVENING", variableWorkHours: false, mealWindows: { breakfast: { start: "08:00", end: "09:00" }, lunch: { start: "13:00", end: "14:30" }, dinner: { start: "19:00", end: "20:30" } }, routineWindows: [], freeTime: { preferredUses: ["Family", "Meditation", "Learning", "Rest"], minimumOpenWindowMinutes: 60, dailyUnscheduledMinutes: 60 }, planningStyle: "BALANCED" } };
 export const demoTasks: Task[] = [
   { id: "task-auth", title: "Build authentication flow", lifeArea: "WORK", status: "PLANNED", priority: "CRITICAL", estimatedMinutes: 120, actualMinutes: 0, energyRequired: "DEEP_FOCUS", schedulingType: "FLEXIBLE", canSplit: true, minimumSessionMinutes: 25 },
   { id: "task-planner", title: "Refine planner constraints", lifeArea: "WORK", status: "BACKLOG", priority: "HIGH", estimatedMinutes: 90, actualMinutes: 0, energyRequired: "DEEP_FOCUS", schedulingType: "FLEXIBLE", canSplit: true, minimumSessionMinutes: 30 },

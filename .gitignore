@@ -9,3 +9,5 @@ test-results
 .turbo
 *.tsbuildinfo
 .DS_Store
+.vercel
+.env*

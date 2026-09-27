@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": ["AUTH_MODE", "DAYOS_TEST_MODE", "DATABASE_URL", "CLERK_SECRET_KEY", "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "NEXT_PUBLIC_API_URL", "DAYOS_BACKEND_ORIGIN", "API_PORT", "PORT", "WEB_URL", "CORS_ORIGINS", "LOG_LEVEL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

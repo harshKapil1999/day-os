@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, Check, Clock3, Droplets, MoveRight, Sparkles } from "lucide-react";
 import { GlassCard, GlassPill } from "@/components/glass/glass";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function LandingPage() {
+  const clerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) && process.env.AUTH_MODE !== "demo";
   return <main className="landing ambient-page">
-    <nav className="landing-nav"><Link href="/" className="brand"><span className="brand-mark">D</span><span>DayOS</span></Link><div className="landing-links"><a href="#how">How it works</a><a href="#principles">Principles</a></div><Link className="button button-secondary button-sm" href="/sign-in">Sign in</Link></nav>
+    <nav className="landing-nav"><Link href="/" className="brand"><span className="brand-mark">D</span><span>DayOS</span></Link><div className="landing-links"><a href="#how">How it works</a><a href="#principles">Principles</a></div><div className="landing-actions"><ThemeToggle/><Link className="button button-secondary button-sm" href="/sign-in">Sign in</Link></div></nav>
     <section className="hero">
       <GlassPill className="eyebrow"><Sparkles size={14}/> Your day, adapted to reality</GlassPill>
       <h1>Know what matters.<br/><em>Do it now.</em></h1>
       <p>DayOS turns your priorities, energy, and commitments into a balanced plan—then reshapes what remains when life changes.</p>
-      <div className="hero-actions"><Link className="button button-primary button-lg" href="/onboarding">Build my first day <ArrowRight size={17}/></Link><Link className="button button-ghost button-lg" href="/app/today">Explore the demo</Link></div>
+      <div className="hero-actions"><Link className="button button-primary button-lg" href={clerk?"/sign-up":"/onboarding"}>Build my first day <ArrowRight size={17}/></Link><Link className="button button-ghost button-lg" href={clerk?"/sign-in":"/app/today"}>{clerk?"Open my DayOS":"Explore the demo"}</Link></div>
       <div className="hero-note"><Check size={15}/> Deterministic planning. No black box.</div>
     </section>
     <section className="product-stage" aria-label="DayOS product preview">
@@ -24,6 +26,6 @@ export default function LandingPage() {
       </GlassCard>
     </section>
     <section id="how" className="landing-section"><span className="overline">A CALMER CONTROL CENTER</span><h2>Plans that leave room for a life.</h2><div className="principle-grid"><article><span>01</span><h3>Start with reality</h3><p>Your available time, fixed events, sleep, meals, exercise, and energy form the edges of the plan.</p></article><article><span>02</span><h3>Protect what matters</h3><p>Focused work fits alongside learning, health, relationships, recovery, and unstructured time.</p></article><article><span>03</span><h3>Adapt with context</h3><p>When work runs long or finishes early, only future flexible blocks move. Commitments stay fixed.</p></article></div></section>
-    <footer><span>DayOS</span><p>Intentional time, one day at a time.</p><Link href="/onboarding">Begin <ArrowRight size={15}/></Link></footer>
+    <footer><span>DayOS</span><p>Intentional time, one day at a time.</p><Link href={clerk?"/sign-up":"/onboarding"}>Begin <ArrowRight size={15}/></Link></footer>
   </main>;
 }

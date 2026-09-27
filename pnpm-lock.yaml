@@ -99,6 +99,9 @@ importers:
       '@dayos/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@dayos/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@dayos/domain':
         specifier: workspace:*
         version: link:../../packages/domain

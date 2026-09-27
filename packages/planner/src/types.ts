@@ -1,7 +1,8 @@
 import type { DailyPlanResult, EnergyRequirement, Flexibility, LifeAreaSlug, Priority, Task, TimeBlock, TimeBlockType } from "@dayos/domain";
 
 export interface FixedEventInput { id: string; title: string; startAt: string; endAt: string; type?: TimeBlockType; lifeArea?: LifeAreaSlug; }
-export interface WindowPreference { id: string; title: string; type: "MEAL" | "EXERCISE" | "HABIT" | "LEARNING"; windowStart: string; windowEnd: string; durationMinutes: number; lifeArea: LifeAreaSlug; priority?: Priority; }
+export interface WindowPreference { id: string; title: string; type: Exclude<TimeBlockType, "TASK" | "FOCUS" | "FREE" | "SLEEP">; windowStart: string; windowEnd: string; durationMinutes: number; lifeArea: LifeAreaSlug; priority?: Priority; flexibility?: "FIXED" | "SEMI_FLEXIBLE"; description?: string; }
+export interface TaskWindowPreference { id: string; title: string; windowStart: string; windowEnd: string; lifeAreas: LifeAreaSlug[]; }
 export interface EnergyWindow { start: string; end: string; energy: EnergyRequirement[]; }
 export interface PlannerConfig {
   bufferMinutes: number;
@@ -18,6 +19,11 @@ export interface GenerateDayPlanInput {
   tasks: Task[];
   fixedEvents?: FixedEventInput[];
   protectedWindows?: WindowPreference[];
+  taskWindows?: TaskWindowPreference[];
+  strictTaskWindows?: boolean;
+  freeTimeSuggestions?: string[];
+  minimumAbundantWindowMinutes?: number;
+  includeSleep?: boolean;
   energyWindows?: EnergyWindow[];
   lifeAreaImportance?: Partial<Record<LifeAreaSlug, number>>;
   config?: Partial<PlannerConfig>;

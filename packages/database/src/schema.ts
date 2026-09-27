@@ -11,7 +11,7 @@ export const taskStatusEnum = pgEnum("task_status", ["BACKLOG", "PLANNED", "IN_P
 export const energyEnum = pgEnum("energy_requirement", ["LOW", "MEDIUM", "HIGH", "DEEP_FOCUS"]);
 export const schedulingEnum = pgEnum("scheduling_type", ["FIXED", "SEMI_FLEXIBLE", "FLEXIBLE"]);
 export const planStatusEnum = pgEnum("plan_status", ["DRAFT", "ACTIVE", "COMPLETED"]);
-export const blockTypeEnum = pgEnum("time_block_type", ["TASK", "FOCUS", "HABIT", "MEAL", "EXERCISE", "LEARNING", "READING", "BREAK", "EVENT", "FREE"]);
+export const blockTypeEnum = pgEnum("time_block_type", ["TASK", "FOCUS", "HABIT", "MEAL", "EXERCISE", "LEARNING", "READING", "HOBBY", "FAMILY", "MEDITATION", "BREAK", "EVENT", "FREE", "SLEEP"]);
 export const blockStatusEnum = pgEnum("time_block_status", ["PLANNED", "ACTIVE", "COMPLETED", "SKIPPED", "RESCHEDULED"]);
 export const focusCompletionEnum = pgEnum("focus_completion", ["COMPLETE", "PARTIAL", "NOT_COMPLETE"]);
 

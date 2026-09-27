@@ -10,7 +10,7 @@ describe("generateDayPlan", () => {
     const result = generateDayPlan({ ...base, tasks: [task(), task()] });
     expect(assertNoOverlaps(result.blocks.map((item) => ({ start: +new Date(item.startAt), end: +new Date(item.endAt) })))).toBe(true);
     expect(result.blocks[0]!.startAt).toBe("2026-08-20T01:30:00.000Z");
-    expect(result.blocks.at(-1)!.endAt).toBe("2026-08-20T17:30:00.000Z");
+    expect(result.blocks.find((item) => item.type === "SLEEP")).toMatchObject({ startAt: "2026-08-20T17:30:00.000Z", endAt: "2026-08-21T01:30:00.000Z", locked: true });
   });
   it("preserves fixed events", () => {
     const startAt = "2026-08-20T06:30:00.000Z"; const endAt = "2026-08-20T07:30:00.000Z";
@@ -26,8 +26,8 @@ describe("generateDayPlan", () => {
       { id: "lunch", title: "Lunch", type: "MEAL", windowStart: "13:00", windowEnd: "14:30", durationMinutes: 45, lifeArea: "RECOVERY" },
       { id: "gym", title: "Gym", type: "EXERCISE", windowStart: "17:00", windowEnd: "19:30", durationMinutes: 60, lifeArea: "HEALTH" }
     ] });
-    expect(result.blocks.find((item) => item.id === "lunch")?.startAt).toBe("2026-08-20T07:30:00.000Z");
-    expect(result.blocks.find((item) => item.id === "gym")?.startAt).toBe("2026-08-20T11:30:00.000Z");
+    expect(result.blocks.find((item) => item.id.startsWith("lunch-"))?.startAt).toBe("2026-08-20T07:30:00.000Z");
+    expect(result.blocks.find((item) => item.id.startsWith("gym-"))?.startAt).toBe("2026-08-20T11:30:00.000Z");
   });
   it("splits allowed tasks and honors minimum duration", () => {
     const result = generateDayPlan({ ...base, tasks: [task({ id: "large", estimatedMinutes: 180, minimumSessionMinutes: 30 })] });
@@ -44,6 +44,33 @@ describe("generateDayPlan", () => {
     const result = generateDayPlan({ ...base, tasks: [task({ estimatedMinutes: 240 })], config: { breakAfterMinutes: 90, breakDurationMinutes: 15, bufferMinutes: 45 } });
     expect(result.blocks.some((item) => item.type === "BREAK")).toBe(true);
     expect(result.blocks.some((item) => item.type === "FREE")).toBe(true);
+  });
+  it("keeps work and learning tasks inside their declared windows", () => {
+    const result = generateDayPlan({ ...base, tasks: [task({ id: "work" }), task({ id: "learn", lifeArea: "LEARNING" })], taskWindows: [
+      { id: "work-window", title: "Work", windowStart: "09:00", windowEnd: "17:00", lifeAreas: ["WORK"] },
+      { id: "learn-window", title: "Learning", windowStart: "19:00", windowEnd: "21:00", lifeAreas: ["LEARNING"] }
+    ] });
+    const work = result.blocks.find((item) => item.taskId === "work")!; const learn = result.blocks.find((item) => item.taskId === "learn")!;
+    expect(new Date(work.startAt).getUTCHours()).toBe(3); expect(new Date(learn.startAt).getUTCHours()).toBe(13);
+  });
+  it("does not schedule a category when its strict window is absent", () => {
+    const result = generateDayPlan({ ...base, tasks: [task({ id: "weekend-work" })], taskWindows: [], strictTaskWindows: true });
+    expect(result.blocks.some((item) => item.taskId === "weekend-work")).toBe(false);
+    expect(result.unscheduledTasks.map((item) => item.id)).toContain("weekend-work");
+  });
+  it("splits open time at category-window boundaries", () => {
+    const result = generateDayPlan({ ...base, tasks: [], taskWindows: [{ id: "work", title: "Work", windowStart: "09:00", windowEnd: "17:00", lifeAreas: ["WORK"] }] });
+    const workCapacity = result.blocks.find((item) => item.type === "FREE" && item.metadata?.taskWindowId === "work")!;
+    expect(workCapacity.startAt).toBe("2026-08-20T03:30:00.000Z"); expect(workCapacity.endAt).toBe("2026-08-20T11:30:00.000Z");
+  });
+  it("protects recurring family and meditation windows and labels abundant capacity", () => {
+    const result = generateDayPlan({ ...base, tasks: [], minimumAbundantWindowMinutes: 60, protectedWindows: [
+      { id: "quiet", title: "Morning meditation", type: "MEDITATION", windowStart: "07:15", windowEnd: "07:35", durationMinutes: 20, flexibility: "FIXED", lifeArea: "RECOVERY" },
+      { id: "family", title: "Family time", type: "FAMILY", windowStart: "19:30", windowEnd: "20:30", durationMinutes: 60, flexibility: "FIXED", lifeArea: "PERSONAL" }
+    ] });
+    expect(result.blocks.find((item) => item.type === "MEDITATION")?.locked).toBe(true);
+    expect(result.blocks.find((item) => item.type === "FAMILY")?.startAt).toBe("2026-08-20T14:00:00.000Z");
+    expect(result.blocks.some((item) => item.type === "FREE" && item.metadata?.abundant === true)).toBe(true);
   });
 });
 

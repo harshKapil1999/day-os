@@ -6,7 +6,7 @@ export type Priority = (typeof PRIORITIES)[number];
 export type EnergyRequirement = "LOW" | "MEDIUM" | "HIGH" | "DEEP_FOCUS";
 export type SchedulingType = "FIXED" | "SEMI_FLEXIBLE" | "FLEXIBLE";
 export type TaskStatus = "BACKLOG" | "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
-export type TimeBlockType = "TASK" | "FOCUS" | "HABIT" | "MEAL" | "EXERCISE" | "LEARNING" | "READING" | "BREAK" | "EVENT" | "FREE";
+export type TimeBlockType = "TASK" | "FOCUS" | "HABIT" | "MEAL" | "EXERCISE" | "LEARNING" | "READING" | "HOBBY" | "FAMILY" | "MEDITATION" | "BREAK" | "EVENT" | "FREE" | "SLEEP";
 export type TimeBlockStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "SKIPPED" | "RESCHEDULED";
 export type Flexibility = "FIXED" | "SEMI_FLEXIBLE" | "FLEXIBLE";
 
@@ -59,6 +59,47 @@ export interface UserProfile {
   defaultBreakDurationMinutes: number;
   dailyWaterTargetMl: number;
   onboardingCompleted: boolean;
+  preferences: UserPreferences;
+}
+
+export interface MealWindowPreference {
+  start: string;
+  end: string;
+}
+
+export type RoutineKind = "WORK" | "EXERCISE" | "LEARNING" | "HOBBY" | "FAMILY" | "MEDITATION" | "WIND_DOWN";
+
+export interface RoutineWindowPreference {
+  id: string;
+  title: string;
+  kind: RoutineKind;
+  days: number[];
+  start: string;
+  end: string;
+  durationMinutes: number;
+  flexibility: "FIXED" | "PREFERRED";
+  active: boolean;
+}
+
+export interface FreeTimePreference {
+  preferredUses: string[];
+  minimumOpenWindowMinutes: number;
+  dailyUnscheduledMinutes: number;
+}
+
+export interface UserPreferences {
+  priorities: string[];
+  improvementGoals: string[];
+  exercisePreference: "MORNING" | "AFTERNOON" | "EVENING" | "NO_PREFERENCE";
+  variableWorkHours: boolean;
+  mealWindows: {
+    breakfast: MealWindowPreference;
+    lunch: MealWindowPreference;
+    dinner: MealWindowPreference;
+  };
+  routineWindows: RoutineWindowPreference[];
+  freeTime: FreeTimePreference;
+  planningStyle: "STRUCTURED" | "BALANCED" | "SPACIOUS";
 }
 
 export interface NotificationService {

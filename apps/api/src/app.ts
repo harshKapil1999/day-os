@@ -12,8 +12,9 @@ import { databaseBridge } from "./store/database-bridge.js";
 
 export function createApp() {
   const app = express();
-  app.disable("x-powered-by"); app.use(helmet()); app.use(requestContext);
-  app.use(cors({ origin: (origin, callback) => !origin || origin === env.WEB_URL ? callback(null, true) : callback(new Error("Origin not allowed")), credentials: true, allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id", "X-DayOS-Demo-User"] }));
+  const allowedOrigins = new Set([env.WEB_URL, ...(env.CORS_ORIGINS?.split(",").map((value) => value.trim()).filter(Boolean) ?? [])]);
+  app.disable("x-powered-by"); app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } })); app.use(requestContext);
+  app.use(cors({ origin: (origin, callback) => !origin || allowedOrigins.has(origin) ? callback(null, true) : callback(new Error("Origin not allowed")), credentials: true, allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id", "X-DayOS-Demo-User"] }));
   app.use(express.json({ limit: "256kb" }));
   app.get("/health", (_req, res) => res.json({ data: { status: "ok" } }));
   app.use("/api/v1", requireAuth, databaseBridge, mutationRateLimit, apiRouter);

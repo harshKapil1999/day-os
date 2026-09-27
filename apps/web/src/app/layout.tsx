@@ -18,6 +18,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f5f5f7" }, { media: "(prefers-color-scheme: dark)", color: "#000000" }] };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY; const content = <Providers clerk={Boolean(publishableKey)}>{children}</Providers>;
-  return <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth"><body>{publishableKey ? <ClerkProvider publishableKey={publishableKey}>{content}</ClerkProvider> : content}</body></html>;
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY; const clerk = Boolean(publishableKey) && process.env.AUTH_MODE !== "demo"; const content = <Providers clerk={clerk}>{children}</Providers>;
+  return <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth"><body>{clerk ? <ClerkProvider publishableKey={publishableKey!}>{content}</ClerkProvider> : content}</body></html>;
 }
